@@ -9,11 +9,26 @@ export default function UploadPage() {
   const [githubUrl, setGithubUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   
-  // Basic Projection Settings
+  // Projection Settings
   const [projection, setProjection] = useState({
     hide_metadata: false,
-    include_provenance: true
+    include_provenance: true,
+    include_fields: [] as string[],
   });
+
+  const PROFILE_FIELDS = [
+    { key: 'full_name', label: 'Full Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'phone', label: 'Phone' },
+    { key: 'location', label: 'Location' },
+    { key: 'current_title', label: 'Current Title' },
+    { key: 'current_company', label: 'Current Company' },
+    { key: 'years_of_experience', label: 'Years of Experience' },
+    { key: 'skills', label: 'Skills' },
+    { key: 'github_url', label: 'GitHub URL' },
+    { key: 'linkedin_url', label: 'LinkedIn URL' },
+    { key: 'portfolio_url', label: 'Portfolio URL' },
+  ];
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +52,11 @@ export default function UploadPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await api.transform(files, githubUrl, linkedinUrl, projection);
+      const projConfig = {
+        ...projection,
+        include_fields: projection.include_fields.length > 0 ? projection.include_fields : undefined
+      };
+      const result = await api.transform(files, githubUrl, linkedinUrl, projConfig);
       navigate(`/result`, { state: { result } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Transform failed');
@@ -135,11 +154,13 @@ export default function UploadPage() {
       {/* Projection Config */}
       <div className="card space-y-4 bg-[var(--color-bg-secondary)] border-0">
         <h3 className="font-medium">Projection Configuration</h3>
-        <div className="flex gap-6">
+        <p className="text-sm text-[var(--color-text-muted)]">Customize the output of the unified canonical profile</p>
+        
+        <div className="flex gap-6 mb-4">
           <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input 
               type="checkbox" 
-              className="rounded border-[var(--color-border)]"
+              className="rounded border-[var(--color-border)] text-[var(--color-accent)]"
               checked={!projection.hide_metadata}
               onChange={(e) => setProjection({...projection, hide_metadata: !e.target.checked})}
             />
@@ -148,12 +169,35 @@ export default function UploadPage() {
           <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input 
               type="checkbox" 
-              className="rounded border-[var(--color-border)]"
+              className="rounded border-[var(--color-border)] text-[var(--color-accent)]"
               checked={projection.include_provenance}
               onChange={(e) => setProjection({...projection, include_provenance: e.target.checked})}
             />
             Include Provenance
           </label>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-medium mb-2">Fields to Include (Leave empty for all fields)</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {PROFILE_FIELDS.map(f => (
+              <label key={f.key} className="flex items-center gap-2 text-sm cursor-pointer hover:text-[var(--color-accent-light)]">
+                <input
+                  type="checkbox"
+                  className="rounded border-[var(--color-border)] text-[var(--color-accent)]"
+                  checked={projection.include_fields.includes(f.key)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setProjection(prev => ({ ...prev, include_fields: [...prev.include_fields, f.key] }));
+                    } else {
+                      setProjection(prev => ({ ...prev, include_fields: prev.include_fields.filter(k => k !== f.key) }));
+                    }
+                  }}
+                />
+                {f.label}
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
