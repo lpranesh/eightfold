@@ -14,11 +14,13 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-from app.config.settings import settings
+from app.config.settings import get_settings
+
+settings = get_settings()
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = str(settings.DATABASE_URL)
+    url = str(settings.database_url)
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -41,7 +43,7 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
     """
     connectable = create_async_engine(
-        str(settings.DATABASE_URL),
+        str(settings.database_url),
         poolclass=pool.NullPool,
     )
 

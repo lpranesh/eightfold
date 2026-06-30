@@ -62,7 +62,6 @@ class CandidateRepository(CandidateRepositoryInterface):
 
             # Save metadata
             db_meta = CandidateMetadataModel(
-                candidate_id=candidate_id,
                 transformation_run_id=record.metadata.transformation_run_id,
                 sources_processed=[s.value for s in record.metadata.sources_processed],
                 total_fields_extracted=record.metadata.total_fields_extracted,
@@ -71,13 +70,12 @@ class CandidateRepository(CandidateRepositoryInterface):
                 processing_duration_ms=record.metadata.processing_duration_ms,
                 warnings=record.metadata.warnings,
             )
-            self._session.add(db_meta)
+            db_candidate.metadata_record = db_meta
 
             # Save provenance as source values
             for field_name, prov in record.provenance.items():
                 for cv in prov.competing_values:
                     db_sv = SourceValueModel(
-                        candidate_id=candidate_id,
                         field_name=field_name,
                         source_type=cv.get("source", "unknown"),
                         raw_value=cv.get("value"),
@@ -87,15 +85,14 @@ class CandidateRepository(CandidateRepositoryInterface):
                         normalizations_applied=prov.normalizations_applied,
                         extraction_method=cv.get("extraction_method"),
                     )
-                    self._session.add(db_sv)
+                    db_candidate.source_values.append(db_sv)
 
             # Save transformation run
             db_run = TransformationRunModel(
-                candidate_id=candidate_id,
                 status="completed",
                 total_duration_ms=record.metadata.processing_duration_ms,
             )
-            self._session.add(db_run)
+            db_candidate.transformation_runs.append(db_run)
 
             await self._session.flush()
 
