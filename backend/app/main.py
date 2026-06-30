@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
     settings = Settings()
     db_manager = DatabaseManager(settings)
+    await db_manager.init_db()
     set_dependencies(db_manager, settings)
     logger.info(
         "Application started: %s v%s (%s)",

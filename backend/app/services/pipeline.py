@@ -14,7 +14,7 @@ from app.confidence import DeterministicConfidenceEngine
 from app.exceptions import FusionException, ValidationException
 from app.extractors.resume_extractor import ResumeExtractor
 from app.extractors.structured_extractors import (
-    ATSExtractor, CSVExtractor, GitHubExtractor, LinkedInExtractor, RecruiterNotesExtractor,
+    CSVExtractor, RecruiterNotesExtractor,
 )
 from app.factories import ParserFactory
 from app.fusion import get_fusion_policy
@@ -277,9 +277,6 @@ class TransformationPipeline:
     def _default_extractors() -> list[ExtractorInterface]:
         return [
             ResumeExtractor(),
-            ATSExtractor(),
-            GitHubExtractor(),
-            LinkedInExtractor(),
             CSVExtractor(),
             RecruiterNotesExtractor(),
         ]

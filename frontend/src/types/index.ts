@@ -58,25 +58,6 @@ export interface CompetingValue {
   extraction_confidence?: number;
 }
 
-export interface FieldExplanation {
-  field_name: string;
-  selected_value: unknown;
-  selected_source: string;
-  confidence: number;
-  confidence_level: string;
-  competing_values: CompetingValue[];
-  reason: string;
-  normalizations_applied: string[];
-  agreeing_sources: number;
-  total_sources: number;
-}
-
-export interface ProjectionResponse {
-  candidate_id: string;
-  projected_profile: Record<string, unknown>;
-  projection_config: Record<string, unknown>;
-}
-
 export interface HealthResponse {
   status: string;
   version: string;
@@ -84,24 +65,13 @@ export interface HealthResponse {
   timestamp: string;
 }
 
-export interface MetadataResponse {
-  candidate_id: string;
-  metadata: Record<string, unknown>;
-}
-
 export type SourceType =
   | 'resume'
   | 'recruiter_csv'
-  | 'ats_json'
-  | 'github'
-  | 'linkedin'
   | 'recruiter_notes';
 
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   resume: 'Resume (PDF)',
   recruiter_csv: 'Recruiter CSV',
-  ats_json: 'ATS JSON',
-  github: 'GitHub Profile',
-  linkedin: 'LinkedIn Profile',
   recruiter_notes: 'Recruiter Notes',
 };

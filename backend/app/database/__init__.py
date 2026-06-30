@@ -61,6 +61,12 @@ class DatabaseManager:
             logger.error("Database health check failed", exc_info=exc)
             return False
 
+    async def init_db(self) -> None:
+        """Create database tables."""
+        from app.models.database import Base
+        async with self._engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
     async def close(self) -> None:
         """Dispose of the engine connection pool."""
         await self._engine.dispose()

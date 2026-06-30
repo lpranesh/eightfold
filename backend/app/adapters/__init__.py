@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 _EXTENSION_MAP: dict[str, list[SourceType]] = {
     ".pdf": [SourceType.RESUME],
     ".csv": [SourceType.RECRUITER_CSV],
-    ".json": [SourceType.ATS_JSON, SourceType.GITHUB, SourceType.LINKEDIN],
     ".txt": [SourceType.RECRUITER_NOTES],
 }
 
@@ -46,25 +45,14 @@ class SourceAdapter:
         if len(candidates) == 1:
             return candidates[0]
 
-        # For JSON files, try to infer from filename
         lower_name = filename.lower()
-        if "github" in lower_name:
-            return SourceType.GITHUB
-        if "linkedin" in lower_name:
-            return SourceType.LINKEDIN
-        if "ats" in lower_name or "applicant" in lower_name:
-            return SourceType.ATS_JSON
         if "resume" in lower_name or "cv" in lower_name:
             return SourceType.RESUME
         if "note" in lower_name or "recruiter" in lower_name:
             return SourceType.RECRUITER_NOTES
 
-        # Default for JSON
-        if ext == ".json":
-            return SourceType.ATS_JSON
-
-        logger.warning("Could not resolve source type for %s, defaulting to ATS_JSON", filename)
-        return SourceType.ATS_JSON
+        logger.warning("Could not resolve source type for %s, defaulting to RECRUITER_NOTES", filename)
+        return SourceType.RECRUITER_NOTES
 
     @staticmethod
     def get_file_extension(filename: str) -> str:

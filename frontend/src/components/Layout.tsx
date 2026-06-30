@@ -5,7 +5,6 @@ import {
   Users,
   Activity,
   Layers,
-  Settings,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -13,7 +12,6 @@ const NAV_ITEMS = [
   { to: '/upload', icon: Upload, label: 'Upload Sources' },
   { to: '/candidates', icon: Users, label: 'Candidates' },
   { to: '/pipeline', icon: Layers, label: 'Pipeline' },
-  { to: '/projection', icon: Settings, label: 'Projection' },
   { to: '/health', icon: Activity, label: 'Health' },
 ];
 

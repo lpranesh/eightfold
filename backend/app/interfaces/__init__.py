@@ -14,7 +14,6 @@ from app.models.domain.candidate import (
     FieldProvenance,
 )
 from app.models.domain.enums import FieldName, SourceType
-from app.models.domain.projection import ProjectionConfig
 from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
 
 
@@ -183,32 +182,6 @@ class ProvenanceBuilderInterface(ABC):
             Complete provenance record.
         """
 
-
-class ProjectionPolicyInterface(ABC):
-    """Contract for projection policies.
-
-    Projections create customized views of the canonical profile
-    without modifying the underlying data.
-    """
-
-    @abstractmethod
-    def project(
-        self,
-        profile: CanonicalProfile,
-        config: ProjectionConfig,
-    ) -> dict[str, Any]:
-        """Apply a projection configuration to a canonical profile.
-
-        Args:
-            profile: The canonical profile to project.
-            config: Projection configuration.
-
-        Returns:
-            A dictionary representing the projected view.
-
-        Raises:
-            ProjectionException: If projection fails.
-        """
 
 
 class CandidateRepositoryInterface(ABC):

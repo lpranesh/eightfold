@@ -13,12 +13,10 @@ from app.factories import ParserFactory
 from app.interfaces import CandidateRepositoryInterface
 from app.models.domain.candidate import CandidateRecord
 from app.models.domain.enums import FieldName, SourceType
-from app.models.domain.projection import ProjectionConfig
 from app.models.dto import (
     CandidateDetailResponse, CandidateListItem, CandidateListResponse,
-    FieldExplanation, MetadataResponse, ProjectionResponse, TransformResponse,
+    TransformResponse,
 )
-from app.projection import DefaultProjectionPolicy
 from app.services.pipeline import SourceInput, TransformationPipeline
 
 logger = logging.getLogger(__name__)
@@ -34,7 +32,6 @@ class CandidateService:
     ) -> None:
         self._repository = repository
         self._pipeline = pipeline
-        self._projection_policy = DefaultProjectionPolicy()
 
     async def transform_sources(
         self,
@@ -83,49 +80,6 @@ class CandidateService:
             updated_at=record.updated_at,
         )
 
-    async def get_candidate_metadata(self, candidate_id: str) -> MetadataResponse:
-        """Get candidate metadata."""
-        record = await self._repository.get_by_id(candidate_id)
-        return MetadataResponse(
-            candidate_id=record.id or "",
-            metadata=record.metadata.model_dump(mode="json"),
-        )
-
-    async def get_projection(
-        self, candidate_id: str, config: ProjectionConfig,
-    ) -> ProjectionResponse:
-        """Apply a projection to a candidate profile."""
-        record = await self._repository.get_by_id(candidate_id)
-        projected = self._projection_policy.project(record.profile, config)
-        return ProjectionResponse(
-            candidate_id=record.id or "",
-            projected_profile=projected,
-            projection_config=config.model_dump(),
-        )
-
-    async def explain_field(
-        self, candidate_id: str, field_name: str,
-    ) -> FieldExplanation:
-        """Get a detailed explanation for how a field was determined."""
-        record = await self._repository.get_by_id(candidate_id)
-        prov = record.provenance.get(field_name)
-        if not prov:
-            raise EntityNotFoundException(
-                message=f"No provenance found for field '{field_name}'",
-                details={"available_fields": list(record.provenance.keys())},
-            )
-        return FieldExplanation(
-            field_name=prov.field_name.value,
-            selected_value=prov.selected_value,
-            selected_source=prov.selected_source.value,
-            confidence=prov.confidence,
-            confidence_level=prov.confidence_level.value,
-            competing_values=prov.competing_values,
-            reason=prov.reason,
-            normalizations_applied=prov.normalizations_applied,
-            agreeing_sources=prov.agreeing_sources,
-            total_sources=prov.total_sources,
-        )
 
     async def list_candidates(
         self, limit: int = 50, offset: int = 0,

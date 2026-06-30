@@ -5,7 +5,6 @@ import Upload from './pages/Upload';
 import CandidatesList from './pages/CandidatesList';
 import CandidateDetail from './pages/CandidateDetail';
 import Pipeline from './pages/Pipeline';
-import Projection from './pages/Projection';
 import Health from './pages/Health';
 
 export default function App() {
@@ -18,7 +17,6 @@ export default function App() {
           <Route path="/candidates" element={<CandidatesList />} />
           <Route path="/candidate/:id" element={<CandidateDetail />} />
           <Route path="/pipeline" element={<Pipeline />} />
-          <Route path="/projection" element={<Projection />} />
           <Route path="/health" element={<Health />} />
         </Route>
       </Routes>

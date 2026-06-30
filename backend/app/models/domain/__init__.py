@@ -14,7 +14,6 @@ from app.models.domain.enums import (
     SourceType,
     TransformationStatus,
 )
-from app.models.domain.projection import ProjectionConfig
 from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
 
 __all__ = [
@@ -29,7 +28,6 @@ __all__ = [
     "FieldName",
     "FieldProvenance",
     "ParsedContent",
-    "ProjectionConfig",
     "SourceType",
     "TransformationStatus",
 ]

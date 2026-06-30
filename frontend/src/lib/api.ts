@@ -3,10 +3,7 @@
 import type {
   CandidateDetailResponse,
   CandidateListResponse,
-  FieldExplanation,
   HealthResponse,
-  MetadataResponse,
-  ProjectionResponse,
   TransformResponse,
 } from '../types';
 
@@ -39,29 +36,5 @@ export const api = {
 
   getCandidate(id: string): Promise<CandidateDetailResponse> {
     return request(`/candidate/${id}`);
-  },
-
-  getMetadata(id: string): Promise<MetadataResponse> {
-    return request(`/candidate/${id}/metadata`);
-  },
-
-  explainField(id: string, fieldName: string): Promise<FieldExplanation> {
-    return request(`/candidate/${id}/explain/${fieldName}`);
-  },
-
-  project(
-    id: string,
-    config: {
-      include_fields?: string[];
-      exclude_fields?: string[];
-      rename_fields?: Record<string, string>;
-      hide_metadata?: boolean;
-    }
-  ): Promise<ProjectionResponse> {
-    return request(`/candidate/${id}/projection`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config),
-    });
   },
 };

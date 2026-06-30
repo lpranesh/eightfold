@@ -8,9 +8,6 @@ class SourceType(str, Enum):
 
     RESUME = "resume"
     RECRUITER_CSV = "recruiter_csv"
-    ATS_JSON = "ats_json"
-    GITHUB = "github"
-    LINKEDIN = "linkedin"
     RECRUITER_NOTES = "recruiter_notes"
 
 

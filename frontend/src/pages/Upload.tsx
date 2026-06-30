@@ -23,15 +23,10 @@ export default function UploadPage() {
     const newEntries: FileEntry[] = [];
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      let type: SourceType = 'ats_json';
+      let type: SourceType = 'recruiter_notes';
       if (ext === 'pdf') type = 'resume';
       else if (ext === 'csv') type = 'recruiter_csv';
       else if (ext === 'txt') type = 'recruiter_notes';
-      else if (ext === 'json') {
-        const lower = file.name.toLowerCase();
-        if (lower.includes('github')) type = 'github';
-        else if (lower.includes('linkedin')) type = 'linkedin';
-      }
       newEntries.push({ file, sourceType: type });
     }
     setEntries((prev) => [...prev, ...newEntries]);
@@ -85,13 +80,13 @@ export default function UploadPage() {
         <UploadIcon size={40} className="mx-auto text-[var(--color-text-muted)] mb-3" />
         <p className="font-medium">Drop files here or click to browse</p>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          Supports PDF, CSV, JSON, and TXT files
+          Supports PDF, CSV, and TXT files
         </p>
         <input
           id="file-input"
           type="file"
           multiple
-          accept=".pdf,.csv,.json,.txt"
+          accept=".pdf,.csv,.txt"
           className="hidden"
           onChange={(e) => addFiles(e.target.files)}
         />

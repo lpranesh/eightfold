@@ -79,13 +79,11 @@ def create_default_parser_factory(ocr_enabled: bool = True) -> ParserFactory:
         A fully configured ParserFactory.
     """
     from app.parsers.csv_parser import CSVParser
-    from app.parsers.json_parser import JSONParser
     from app.parsers.pdf_parser import PDFParser
     from app.parsers.text_parser import TextParser
 
     factory = ParserFactory()
     factory.register(PDFParser(ocr_enabled=ocr_enabled))
     factory.register(CSVParser())
-    factory.register(JSONParser())
     factory.register(TextParser())
     return factory

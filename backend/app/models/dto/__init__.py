@@ -14,7 +14,6 @@ from app.models.domain.enums import SourceType
 
 # --- Request DTOs ---
 
-
 class SourceUpload(BaseModel):
     """Metadata for a single uploaded source file."""
 
@@ -34,17 +33,7 @@ class TransformRequest(BaseModel):
     )
 
 
-class ProjectionRequest(BaseModel):
-    """Request body for the projection endpoint."""
-
-    include_fields: Optional[list[str]] = None
-    exclude_fields: Optional[list[str]] = None
-    rename_fields: dict[str, str] = Field(default_factory=dict)
-    hide_metadata: bool = False
-
-
 # --- Response DTOs ---
-
 
 class ErrorResponse(BaseModel):
     """Standard error response format."""
@@ -52,21 +41,6 @@ class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
     status_code: int
-
-
-class FieldExplanation(BaseModel):
-    """Explanation for how a single field was determined."""
-
-    field_name: str
-    selected_value: Any
-    selected_source: str
-    confidence: float
-    confidence_level: str
-    competing_values: list[dict[str, Any]]
-    reason: str
-    normalizations_applied: list[str]
-    agreeing_sources: int
-    total_sources: int
 
 
 class TransformResponse(BaseModel):
@@ -114,21 +88,6 @@ class CandidateDetailResponse(BaseModel):
     updated_at: datetime
 
 
-class ProjectionResponse(BaseModel):
-    """Response from the projection endpoint."""
-
-    candidate_id: str
-    projected_profile: dict[str, Any]
-    projection_config: dict[str, Any]
-
-
-class MetadataResponse(BaseModel):
-    """Response for candidate metadata."""
-
-    candidate_id: str
-    metadata: dict[str, Any]
-
-
 class HealthResponse(BaseModel):
     """Health check response."""
 
@@ -136,24 +95,3 @@ class HealthResponse(BaseModel):
     version: str
     database: str
     timestamp: datetime
-
-
-class PipelineStageInfo(BaseModel):
-    """Information about a single pipeline stage."""
-
-    name: str
-    status: str
-    duration_ms: Optional[float] = None
-    items_processed: int = 0
-    warnings: list[str] = Field(default_factory=list)
-
-
-class TransformationRunResponse(BaseModel):
-    """Detailed information about a transformation run."""
-
-    run_id: str
-    candidate_id: str
-    stages: list[PipelineStageInfo]
-    total_duration_ms: float
-    status: str
-    created_at: datetime
