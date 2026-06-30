@@ -1,44 +1,31 @@
+version: '3.8'
 
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: candidate_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/candidate_db
-      SECRET_KEY: dev-secret-key-change-in-production-32chars
-      ENVIRONMENT: development
-      DEBUG: "true"
-    depends_on:
-      db:
-        condition: service_healthy
+      - ENABLE_NER=false
+      - OCR_ENGINE=tesseract
     volumes:
       - ./backend:/app
+      # Cache for uv
+      - uv-cache:/root/.cache/uv
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     environment:
-      VITE_API_URL: http://localhost:8000/api
-    depends_on:
-      - backend
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
-  pgdata:
+  uv-cache:

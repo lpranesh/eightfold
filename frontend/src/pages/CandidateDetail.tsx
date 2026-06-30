@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import {
   ArrowLeft, Mail, Phone, MapPin, Briefcase, Building,
   Globe, Info, ChevronDown,
 } from 'lucide-react';
-import { api } from '../lib/api';
-import type { CandidateDetailResponse } from '../types';
+import type { TransformResponse } from '../types';
 
 function ConfidenceBar({ value }: { value: number }) {
   const color = value >= 0.8 ? 'var(--color-success)' : value >= 0.5 ? 'var(--color-warning)' : 'var(--color-error)';
@@ -50,10 +49,9 @@ function FieldRow({ label, value, explanation }: {
             <div className="text-xs space-y-1">
               <span className="text-[var(--color-text-muted)]">Competing values:</span>
               {explanation.competing_values.map((cv: any, i: number) => (
-                <div key={i} className={`flex gap-2 ${cv.is_selected ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
+                <div key={i} className={`flex gap-2 text-[var(--color-text-muted)]`}>
                   <span>[{cv.source}]</span>
                   <span>{String(cv.value)}</span>
-                  {cv.is_selected && <span className="text-[var(--color-success)]">✓</span>}
                 </div>
               ))}
             </div>
@@ -69,22 +67,19 @@ function FieldRow({ label, value, explanation }: {
   );
 }
 
-export default function CandidateDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [candidate, setCandidate] = useState<CandidateDetailResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'profile' | 'metadata' | 'provenance'>('profile');
+export default function Result() {
+  const location = useLocation();
+  const [tab, setTab] = useState<'profile' | 'metadata'>('profile');
 
-  useEffect(() => {
-    if (!id) return;
-    api.getCandidate(id).then(setCandidate).finally(() => setLoading(false));
-  }, [id]);
+  const result = location.state?.result as TransformResponse;
 
-  if (loading) return <div className="text-center py-20 text-[var(--color-text-muted)]">Loading...</div>;
-  if (!candidate) return <div className="text-center py-20 text-[var(--color-error)]">Candidate not found</div>;
+  if (!result) {
+    return <Navigate to="/upload" replace />;
+  }
 
-  const p = candidate.profile as Record<string, unknown>;
-  const m = candidate.metadata as Record<string, unknown>;
+  const p = result.profile as Record<string, unknown>;
+  const m = result.metadata as Record<string, unknown>;
+  const prov = result.provenance as Record<string, any>;
 
   const PROFILE_FIELDS = [
     { label: 'Full Name', key: 'full_name', icon: null },
@@ -107,8 +102,8 @@ export default function CandidateDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/candidates" className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent-light)]">
-        <ArrowLeft size={16} /> Back to candidates
+      <Link to="/upload" className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent-light)]">
+        <ArrowLeft size={16} /> Transform another
       </Link>
 
       {/* Header */}
@@ -120,11 +115,11 @@ export default function CandidateDetail() {
           <h1 className="text-xl font-bold">{String(p.full_name || 'Unknown Candidate')}</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">{String(p.current_title || '')} {p.current_company ? `at ${p.current_company}` : ''}</p>
           <div className="flex items-center gap-4 mt-2">
-            <span className={`badge badge-${Number(m.overall_confidence || 0) >= 0.8 ? 'high' : Number(m.overall_confidence || 0) >= 0.5 ? 'medium' : 'low'}`}>
-              {(Number(m.overall_confidence || 0) * 100).toFixed(0)}% confidence
+            <span className={`badge badge-${Number(m?.overall_confidence || 0) >= 0.8 ? 'high' : Number(m?.overall_confidence || 0) >= 0.5 ? 'medium' : 'low'}`}>
+              {(Number(m?.overall_confidence || 0) * 100).toFixed(0)}% confidence
             </span>
             <span className="text-xs text-[var(--color-text-muted)]">
-              {(m.sources_processed as string[] || []).length} sources
+              {(m?.sources_processed as string[] || []).length} sources
             </span>
           </div>
         </div>
@@ -144,12 +139,12 @@ export default function CandidateDetail() {
       {tab === 'profile' && (
         <div className="card p-0 overflow-hidden">
           {PROFILE_FIELDS.map(({ label, key }) => (
-            <FieldRow key={key} label={label} value={p[key]} explanation={candidate.provenance?.[key]} />
+            <FieldRow key={key} label={label} value={p[key]} explanation={prov?.[key]} />
           ))}
         </div>
       )}
 
-      {tab === 'metadata' && (
+      {tab === 'metadata' && m && (
         <div className="card space-y-3">
           {Object.entries(m).map(([k, v]) => (
             <div key={k} className="flex justify-between py-2 border-b border-[var(--color-border)] last:border-0">

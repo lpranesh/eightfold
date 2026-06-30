@@ -1,32 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Upload, TrendingUp, Shield, ArrowRight } from 'lucide-react';
+import { Upload, Shield, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
-import type { CandidateListItem, HealthResponse } from '../types';
+import type { HealthResponse } from '../types';
 
 export default function Dashboard() {
-  const [candidates, setCandidates] = useState<CandidateListItem[]>([]);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.allSettled([
-      api.listCandidates(5),
-      api.health(),
-    ]).then(([candResult, healthResult]) => {
-      if (candResult.status === 'fulfilled') setCandidates(candResult.value.candidates);
-      if (healthResult.status === 'fulfilled') setHealth(healthResult.value);
-      setLoading(false);
-    });
+    api.health()
+      .then(setHealth)
+      .finally(() => setLoading(false));
   }, []);
 
-  const avgConfidence = candidates.length
-    ? candidates.reduce((s, c) => s + c.overall_confidence, 0) / candidates.length
-    : 0;
-
   const stats = [
-    { label: 'Total Candidates', value: candidates.length, icon: Users, color: 'var(--color-accent)' },
-    { label: 'Avg Confidence', value: `${(avgConfidence * 100).toFixed(0)}%`, icon: TrendingUp, color: 'var(--color-success)' },
     { label: 'System Status', value: health?.status === 'ok' ? 'Healthy' : 'Unknown', icon: Shield, color: health?.status === 'ok' ? 'var(--color-success)' : 'var(--color-warning)' },
   ];
 
@@ -68,48 +56,7 @@ export default function Dashboard() {
           </div>
           <ArrowRight size={18} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-accent-light)] transition-colors" />
         </Link>
-        <Link to="/candidates" className="card group cursor-pointer flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-[var(--color-success)]/10 flex items-center justify-center">
-              <Users size={20} className="text-[var(--color-success)]" />
-            </div>
-            <div>
-              <h3 className="font-semibold">View Candidates</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">Browse transformed candidate profiles</p>
-            </div>
-          </div>
-          <ArrowRight size={18} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-success)] transition-colors" />
-        </Link>
       </div>
-
-      {/* Recent Candidates */}
-      {candidates.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Recent Candidates</h2>
-          <div className="space-y-2">
-            {candidates.map((c) => (
-              <Link key={c.id} to={`/candidate/${c.id}`}
-                className="card flex items-center justify-between py-3 px-4 hover:bg-[var(--color-bg-hover)]">
-                <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-full bg-[var(--color-accent)]/15 flex items-center justify-center text-sm font-semibold text-[var(--color-accent-light)]">
-                    {(c.full_name || '?')[0]}
-                  </div>
-                  <div>
-                    <p className="font-medium">{c.full_name || 'Unknown'}</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{c.email || 'No email'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className={`badge badge-${c.overall_confidence >= 0.8 ? 'high' : c.overall_confidence >= 0.5 ? 'medium' : 'low'}`}>
-                    {(c.overall_confidence * 100).toFixed(0)}%
-                  </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">{c.sources_count} sources</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

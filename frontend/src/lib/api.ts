@@ -1,11 +1,6 @@
 /** API client for the backend. */
 
-import type {
-  CandidateDetailResponse,
-  CandidateListResponse,
-  HealthResponse,
-  TransformResponse,
-} from '../types';
+import type { HealthResponse, TransformResponse } from '../types';
 
 const API_BASE = '/api';
 
@@ -23,18 +18,13 @@ export const api = {
     return request('/health');
   },
 
-  transform(files: File[], sourceTypes: string[]): Promise<TransformResponse> {
+  transform(files: File[], githubUrl?: string, linkedinUrl?: string, projection?: Record<string, any>): Promise<TransformResponse> {
     const form = new FormData();
     files.forEach((f) => form.append('files', f));
-    sourceTypes.forEach((t) => form.append('source_types', t));
+    if (githubUrl) form.append('github_url', githubUrl);
+    if (linkedinUrl) form.append('linkedin_url', linkedinUrl);
+    if (projection) form.append('projection_json', JSON.stringify(projection));
+    
     return request('/transform', { method: 'POST', body: form });
-  },
-
-  listCandidates(limit = 50, offset = 0): Promise<CandidateListResponse> {
-    return request(`/candidates?limit=${limit}&offset=${offset}`);
-  },
-
-  getCandidate(id: string): Promise<CandidateDetailResponse> {
-    return request(`/candidate/${id}`);
   },
 };

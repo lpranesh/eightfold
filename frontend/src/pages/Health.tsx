@@ -20,7 +20,6 @@ export default function HealthPage() {
   useEffect(() => { check(); }, []);
 
   const isHealthy = health?.status === 'ok';
-  const dbHealthy = health?.database === 'healthy';
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -58,10 +57,9 @@ export default function HealthPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { label: 'API Server', status: isHealthy, detail: `v${health.version}` },
-              { label: 'Database', status: dbHealthy, detail: health.database },
               { label: 'Status', status: isHealthy, detail: health.status },
             ].map(({ label, status, detail }) => (
               <div key={label} className="card">

@@ -1,56 +1,44 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload as UploadIcon, X, FileText, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload as UploadIcon, X, FileText, Loader2, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
 import { api } from '../lib/api';
-import { SOURCE_TYPE_LABELS, type SourceType } from '../types';
-
-interface FileEntry {
-  file: File;
-  sourceType: SourceType;
-}
-
-const SOURCE_TYPES = Object.entries(SOURCE_TYPE_LABELS) as [SourceType, string][];
 
 export default function UploadPage() {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState<FileEntry[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [githubUrl, setGithubUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  
+  // Basic Projection Settings
+  const [projection, setProjection] = useState({
+    hide_metadata: false,
+    include_provenance: true
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const addFiles = useCallback((files: FileList | null) => {
-    if (!files) return;
-    const newEntries: FileEntry[] = [];
-    for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      let type: SourceType = 'recruiter_notes';
-      if (ext === 'pdf') type = 'resume';
-      else if (ext === 'csv') type = 'recruiter_csv';
-      else if (ext === 'txt') type = 'recruiter_notes';
-      newEntries.push({ file, sourceType: type });
-    }
-    setEntries((prev) => [...prev, ...newEntries]);
+  const addFiles = useCallback((addedFiles: FileList | null) => {
+    if (!addedFiles) return;
+    setFiles((prev) => [...prev, ...Array.from(addedFiles)]);
     setError(null);
   }, []);
 
-  const removeEntry = (index: number) => {
-    setEntries((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const updateType = (index: number, type: SourceType) => {
-    setEntries((prev) => prev.map((e, i) => (i === index ? { ...e, sourceType: type } : e)));
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
-    if (entries.length === 0) { setError('Add at least one file'); return; }
+    if (files.length === 0 && !githubUrl && !linkedinUrl) { 
+      setError('Add at least one file or URL'); 
+      return; 
+    }
     setLoading(true);
     setError(null);
     try {
-      const result = await api.transform(
-        entries.map((e) => e.file),
-        entries.map((e) => e.sourceType),
-      );
-      navigate(`/candidate/${result.candidate_id}`);
+      const result = await api.transform(files, githubUrl, linkedinUrl, projection);
+      navigate(`/result`, { state: { result } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Transform failed');
     } finally {
@@ -67,6 +55,35 @@ export default function UploadPage() {
         </p>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">GitHub URL</label>
+          <div className="relative">
+            <Globe className="absolute left-3 top-2.5 text-[var(--color-text-muted)]" size={16} />
+            <input 
+              type="url" 
+              placeholder="https://github.com/username"
+              className="input-field pl-9 w-full"
+              value={githubUrl}
+              onChange={(e) => setGithubUrl(e.target.value)}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">LinkedIn URL</label>
+          <div className="relative">
+            <Globe className="absolute left-3 top-2.5 text-[var(--color-text-muted)]" size={16} />
+            <input 
+              type="url" 
+              placeholder="https://linkedin.com/in/username"
+              className="input-field pl-9 w-full"
+              value={linkedinUrl}
+              onChange={(e) => setLinkedinUrl(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Dropzone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -80,7 +97,7 @@ export default function UploadPage() {
         <UploadIcon size={40} className="mx-auto text-[var(--color-text-muted)] mb-3" />
         <p className="font-medium">Drop files here or click to browse</p>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          Supports PDF, CSV, and TXT files
+          Supports PDF and CSV files
         </p>
         <input
           id="file-input"
@@ -93,36 +110,52 @@ export default function UploadPage() {
       </div>
 
       {/* File List */}
-      {entries.length > 0 && (
+      {files.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-            Sources ({entries.length})
+            Files ({files.length})
           </h2>
-          {entries.map((entry, i) => (
+          {files.map((file, i) => (
             <div key={i} className="card flex items-center gap-4 py-3">
               <FileText size={20} className="text-[var(--color-accent-light)] shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{entry.file.name}</p>
+                <p className="text-sm font-medium truncate">{file.name}</p>
                 <p className="text-xs text-[var(--color-text-muted)]">
-                  {(entry.file.size / 1024).toFixed(1)} KB
+                  {(file.size / 1024).toFixed(1)} KB
                 </p>
               </div>
-              <select
-                value={entry.sourceType}
-                onChange={(e) => updateType(i, e.target.value as SourceType)}
-                className="input-field w-48 text-sm"
-              >
-                {SOURCE_TYPES.map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-              <button onClick={() => removeEntry(i)} className="text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-colors">
+              <button onClick={() => removeFile(i)} className="text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-colors">
                 <X size={18} />
               </button>
             </div>
           ))}
         </div>
       )}
+
+      {/* Projection Config */}
+      <div className="card space-y-4 bg-[var(--color-bg-secondary)] border-0">
+        <h3 className="font-medium">Projection Configuration</h3>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-[var(--color-border)]"
+              checked={!projection.hide_metadata}
+              onChange={(e) => setProjection({...projection, hide_metadata: !e.target.checked})}
+            />
+            Include Metadata
+          </label>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-[var(--color-border)]"
+              checked={projection.include_provenance}
+              onChange={(e) => setProjection({...projection, include_provenance: e.target.checked})}
+            />
+            Include Provenance
+          </label>
+        </div>
+      </div>
 
       {/* Error */}
       {error && (
@@ -134,8 +167,8 @@ export default function UploadPage() {
       {/* Submit */}
       <button
         onClick={handleSubmit}
-        disabled={loading || entries.length === 0}
-        className="btn-primary flex items-center gap-2"
+        disabled={loading || (files.length === 0 && !githubUrl && !linkedinUrl)}
+        className="btn-primary flex items-center gap-2 w-full justify-center"
       >
         {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
         {loading ? 'Transforming...' : 'Transform Sources'}

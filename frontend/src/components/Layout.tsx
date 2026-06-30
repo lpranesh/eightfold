@@ -2,7 +2,6 @@ import { NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
   Upload,
-  Users,
   Activity,
   Layers,
 } from 'lucide-react';
@@ -10,7 +9,6 @@ import {
 const NAV_ITEMS = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/upload', icon: Upload, label: 'Upload Sources' },
-  { to: '/candidates', icon: Users, label: 'Candidates' },
   { to: '/pipeline', icon: Layers, label: 'Pipeline' },
   { to: '/health', icon: Activity, label: 'Health' },
 ];
