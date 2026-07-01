@@ -25,23 +25,53 @@ The backend implements a clean separation of concerns using emergent design patt
 
 ## 🚀 Getting Started
 
-The entire stack is containerized and relies on `uv` for lightning-fast dependency resolution.
-
 ### Prerequisites
 *   Docker & Docker Compose
+*   Node.js 22+ (for local frontend)
+*   Python 3.12+ (for local backend)
+*   [uv](https://github.com/astral-sh/uv) (for local Python dependency management)
 
-### Running the Application
+### 🐳 Running via Docker (Recommended)
 
-```bash
-docker compose up --build
-```
+1. Navigate to the root directory.
+2. Build and start the containers using Docker Compose:
+   ```bash
+   sudo docker compose up --build
+   ```
 
+**Access the application:**
 - **Frontend UI**: http://localhost:5173
 - **Backend API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 
-### Environment Configuration (`docker-compose.yml`)
-- `ENABLE_NER`: Toggles the NER extraction phase (`true` | `false`). Defaults to `false`.
+### 💻 Running Locally (Development Mode)
+
+If you prefer to run the application directly on your machine without Docker:
+
+#### 1. Start the Backend
+```bash
+cd backend
+# Install dependencies and sync virtual environment using uv
+uv sync
+# Activate the virtual environment
+source .venv/bin/activate
+# Run the FastAPI server
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### 2. Start the Frontend
+In a new terminal window:
+```bash
+cd frontend
+# Install dependencies
+npm install
+# Start the Vite development server
+npm run dev
+```
+The frontend will be available at http://localhost:5173, automatically proxying `/api` requests to your local backend.
+
+### Environment Configuration (`docker-compose.yml` / `.env`)
+- `ENABLE_NER`: Toggles the NER extraction phase (`true` | `false`). Defaults to `false`. *(Note: Requires ~700MB model download on first startup if enabled).*
 - `OCR_ENGINE`: Configures the PDF fallback extraction engine (default: `tesseract`).
 
 ## 📁 Repository Structure
