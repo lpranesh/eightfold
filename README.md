@@ -111,3 +111,13 @@ Eg :
 ![Alt text](hybrid-1.jpeg)
 ![Alt text](hybrid-2.jpeg)
 
+## Canonical Profile 
+![Alt text](canonical_profile.jpeg)
+
+## Projection layer
+![Alt text](projection_layer.jpeg)
+
+## After Projection validated output
+![Alt text](after_projection.jpeg)
+
+
