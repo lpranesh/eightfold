@@ -21,9 +21,3 @@ export interface CompetingValue {
   value: unknown;
   confidence: number;
 }
-
-export interface HealthResponse {
-  status: string;
-  version: string;
-  timestamp: string;
-}

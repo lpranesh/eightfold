@@ -1,6 +1,6 @@
 /** API client for the backend. */
 
-import type { HealthResponse, TransformResponse } from '../types';
+import type { TransformResponse } from '../types';
 
 const API_BASE = '/api';
 
@@ -14,9 +14,6 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health(): Promise<HealthResponse> {
-    return request('/health');
-  },
 
   transform(files: File[], githubUrl?: string, linkedinUrl?: string, projection?: Record<string, any>): Promise<TransformResponse> {
     const form = new FormData();
