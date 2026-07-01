@@ -1,4 +1,6 @@
 # Candidate Data Transformer
+## DEMO VIDEO 
+[Click here to view demo video](https://drive.google.com/file/d/1DYRbRlF3OrlHe3G74xXvVrDwbrS1Y7lD/view?usp=drive_link)
 
 A robust, multi-source pipeline that intelligently fuses disparate candidate data (resumes, LinkedIn, GitHub, recruiter notes) into a unified, canonical profile. This project was built to demonstrate architectural cleanliness, deterministic transformations, and pipeline explainability.
 
