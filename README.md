@@ -97,3 +97,11 @@ frontend/
 │   └── lib/             # API client and types
 └── Dockerfile           # Node 22 alpine image
 ```
+
+# Demo of design choices and advantages 
+
+Initially I implemented only Regex extraction.
+During testing, I found that Regex works extremely well for deterministic entities like emails, phone numbers and URLs.
+
+Eg :
+f
