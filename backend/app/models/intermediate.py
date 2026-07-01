@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Any, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SourceType(str, Enum):
@@ -13,15 +13,6 @@ class SourceType(str, Enum):
     RECRUITER_CSV = "recruiter_csv"
 
 
-class ParsedContent(BaseModel):
-    """Raw parsed content from a source document."""
-    source_type: SourceType
-    filename: Optional[str] = None
-    raw_text: Optional[str] = None
-    structured_data: Optional[dict[str, Any]] = None
-    parse_warnings: list[str] = []
-
-
 class ExtractedValue(BaseModel):
     """A single piece of data extracted from a source."""
     field_name: str
@@ -29,10 +20,30 @@ class ExtractedValue(BaseModel):
     source_type: SourceType
     extraction_method: str
     extraction_confidence: float = 1.0
+    normalizations: list[str] = Field(default_factory=list)
 
+class RawInput(BaseModel):
+    source_type: SourceType
+    filename: Optional[str] = None
+    content: bytes
+    url: Optional[str] = None
 
-class ExtractedRecord(BaseModel):
+class ParsedDocument(BaseModel):
+    """Raw parsed content from a source document."""
+    source_type: SourceType
+    filename: Optional[str] = None
+    raw_text: Optional[str] = None
+    structured_data: Optional[dict[str, Any]] = None
+    parse_warnings: list[str] = Field(default_factory=list)
+
+class ExtractedCandidate(BaseModel):
     """All values extracted from a single source."""
     source_type: SourceType
     values: list[ExtractedValue]
-    extraction_warnings: list[str] = []
+    extraction_warnings: list[str] = Field(default_factory=list)
+
+class NormalizedCandidate(BaseModel):
+    """Normalized extracted candidate."""
+    source_type: SourceType
+    values: list[ExtractedValue]
+

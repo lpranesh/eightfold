@@ -2,7 +2,7 @@
 
 from typing import Any
 from app.interfaces.extractor import ExtractorInterface
-from app.models.intermediate import ExtractedRecord, ExtractedValue, ParsedContent, SourceType
+from app.models.intermediate import ExtractedCandidate, ExtractedValue, ParsedDocument, SourceType
 from app.core.exceptions import ExtractionException
 
 
@@ -32,7 +32,7 @@ class GitHubStructuredExtractor(ExtractorInterface):
     
     FIELD_MAP = {
         "name": "full_name", "login": "github_url",
-        "email": "email", "bio": "summary",
+        "email": "emails", "bio": "summary",
         "location": "location", "company": "current_company",
         "html_url": "github_url", "blog": "portfolio_url",
     }
@@ -40,7 +40,7 @@ class GitHubStructuredExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.GITHUB_PROFILE]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         data = parsed.structured_data or {}
         values = _extract_mapped(data, self.FIELD_MAP, SourceType.GITHUB_PROFILE)
         
@@ -57,7 +57,7 @@ class GitHubStructuredExtractor(ExtractorInterface):
                 extraction_confidence=0.8
             ))
             
-        return ExtractedRecord(source_type=SourceType.GITHUB_PROFILE, values=values)
+        return ExtractedCandidate(source_type=SourceType.GITHUB_PROFILE, values=values)
 
 
 class LinkedInStructuredExtractor(ExtractorInterface):
@@ -65,7 +65,7 @@ class LinkedInStructuredExtractor(ExtractorInterface):
 
     FIELD_MAP = {
         "full_name": "full_name", "first_name": "first_name",
-        "last_name": "last_name", "email": "email",
+        "last_name": "last_name", "email": "emails",
         "headline": "current_title", "location": "location",
         "summary": "summary", "skills": "skills",
         "public_profile_url": "linkedin_url",
@@ -74,10 +74,10 @@ class LinkedInStructuredExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.LINKEDIN_PROFILE]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         data = parsed.structured_data or {}
         values = _extract_mapped(data, self.FIELD_MAP, SourceType.LINKEDIN_PROFILE)
-        return ExtractedRecord(source_type=SourceType.LINKEDIN_PROFILE, values=values)
+        return ExtractedCandidate(source_type=SourceType.LINKEDIN_PROFILE, values=values)
 
 
 class CSVStructuredExtractor(ExtractorInterface):
@@ -85,7 +85,7 @@ class CSVStructuredExtractor(ExtractorInterface):
 
     FIELD_MAP = {
         "name": "full_name", "first_name": "first_name", "last_name": "last_name",
-        "email": "email", "phone": "phone", "location": "location",
+        "email": "emails", "phone": "phones", "location": "location",
         "title": "current_title", "company": "current_company",
         "years_of_experience": "years_of_experience",
         "linkedin": "linkedin_url", "github": "github_url",
@@ -94,13 +94,13 @@ class CSVStructuredExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.RECRUITER_CSV]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         data = parsed.structured_data or {}
         rows = data.get("rows", [])
         if not rows:
-            return ExtractedRecord(source_type=SourceType.RECRUITER_CSV, values=[], extraction_warnings=["No data rows in CSV"])
+            return ExtractedCandidate(source_type=SourceType.RECRUITER_CSV, values=[], extraction_warnings=["No data rows in CSV"])
         
         # Use first row
         row = rows[0]
         values = _extract_mapped(row, self.FIELD_MAP, SourceType.RECRUITER_CSV)
-        return ExtractedRecord(source_type=SourceType.RECRUITER_CSV, values=values)
+        return ExtractedCandidate(source_type=SourceType.RECRUITER_CSV, values=values)

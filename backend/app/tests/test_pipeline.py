@@ -4,7 +4,7 @@ import json
 import pytest
 
 from app.models.domain.enums import FieldName, SourceType, ConfidenceLevel
-from app.models.domain.source import ParsedContent, ExtractedValue, ExtractedRecord
+from app.models.domain.source import ParsedDocument, ExtractedValue, ExtractedCandidate
 from app.models.domain.projection import ProjectionConfig
 from app.models.domain.candidate import CanonicalProfile
 
@@ -68,7 +68,7 @@ class TestResumeExtractor:
     def test_extract_email(self):
         from app.extractors.resume_extractor import ResumeExtractor
         ext = ResumeExtractor()
-        parsed = ParsedContent(
+        parsed = ParsedDocument(
             source_type=SourceType.RESUME,
             raw_text="John Doe\njohn@example.com\n555-123-4567",
         )
@@ -80,7 +80,7 @@ class TestResumeExtractor:
     def test_extract_name(self):
         from app.extractors.resume_extractor import ResumeExtractor
         ext = ResumeExtractor()
-        parsed = ParsedContent(
+        parsed = ParsedDocument(
             source_type=SourceType.RESUME,
             raw_text="John Doe\njohn@example.com\n\nExperience\n...",
         )
@@ -94,7 +94,7 @@ class TestStructuredExtractors:
     def test_ats_extractor(self):
         from app.extractors.structured_extractors import ATSExtractor
         ext = ATSExtractor()
-        parsed = ParsedContent(
+        parsed = ParsedDocument(
             source_type=SourceType.ATS_JSON,
             structured_data={"name": "Alice", "email": "alice@test.com", "skills": ["Python"]},
         )
@@ -105,7 +105,7 @@ class TestStructuredExtractors:
     def test_github_extractor(self):
         from app.extractors.structured_extractors import GitHubExtractor
         ext = GitHubExtractor()
-        parsed = ParsedContent(
+        parsed = ParsedDocument(
             source_type=SourceType.GITHUB,
             structured_data={"name": "Bob", "login": "bobdev", "bio": "Developer"},
         )

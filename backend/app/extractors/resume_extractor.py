@@ -7,7 +7,7 @@ from typing import Any, Optional
 from app.exceptions import ExtractionException
 from app.interfaces import ExtractorInterface
 from app.models.domain.enums import FieldName, SourceType
-from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
+from app.models.domain.source import ExtractedCandidate, ExtractedValue, ParsedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class ResumeExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.RESUME]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         if not parsed.raw_text:
             raise ExtractionException(message="No text content for extraction")
 
@@ -44,7 +44,7 @@ class ResumeExtractor(ExtractorInterface):
         sections = self._find_sections(text)
         self._extract_sections(text, sections, values, warnings)
 
-        return ExtractedRecord(source_type=SourceType.RESUME, values=values, extraction_warnings=warnings)
+        return ExtractedCandidate(source_type=SourceType.RESUME, values=values, extraction_warnings=warnings)
 
     def _extract_contact(self, text: str, values: list[ExtractedValue], warnings: list[str]) -> None:
         emails = self.EMAIL_RE.findall(text)

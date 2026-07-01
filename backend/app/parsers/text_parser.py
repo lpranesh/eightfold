@@ -8,7 +8,7 @@ import logging
 from app.exceptions import ParsingException
 from app.interfaces import ParserInterface
 from app.models.domain.enums import SourceType
-from app.models.domain.source import ParsedContent
+from app.models.domain.source import ParsedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class TextParser(ParserInterface):
         """Check if this parser handles the given source."""
         return file_extension.lower() == ".txt"
 
-    def parse(self, content: bytes, source_type: SourceType) -> ParsedContent:
+    def parse(self, content: bytes, source_type: SourceType) -> ParsedDocument:
         """Parse a plain text file.
 
         Args:
@@ -31,7 +31,7 @@ class TextParser(ParserInterface):
             source_type: The source type (typically RECRUITER_NOTES).
 
         Returns:
-            ParsedContent with raw_text.
+            ParsedDocument with raw_text.
 
         Raises:
             ParsingException: If the file cannot be decoded.
@@ -61,7 +61,7 @@ class TextParser(ParserInterface):
             extra={"text_length": len(text)},
         )
 
-        return ParsedContent(
+        return ParsedDocument(
             source_type=source_type,
             raw_text=text,
             parse_warnings=warnings,

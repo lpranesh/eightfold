@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from app.interfaces import ExtractorInterface
 from app.models.domain.enums import FieldName, SourceType
-from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
+from app.models.domain.source import ExtractedCandidate, ExtractedValue, ParsedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +48,16 @@ class CSVExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.RECRUITER_CSV]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         data = parsed.structured_data or {}
         rows = data.get("rows", [])
         if not rows:
-            return ExtractedRecord(source_type=SourceType.RECRUITER_CSV,
+            return ExtractedCandidate(source_type=SourceType.RECRUITER_CSV,
                                    extraction_warnings=["No data rows in CSV"])
         # Use the first row
         row = rows[0]
         values = _extract_mapped(row, _ATS_FIELD_MAP, SourceType.RECRUITER_CSV)
-        return ExtractedRecord(source_type=SourceType.RECRUITER_CSV, values=values)
+        return ExtractedCandidate(source_type=SourceType.RECRUITER_CSV, values=values)
 
 
 class RecruiterNotesExtractor(ExtractorInterface):
@@ -71,7 +71,7 @@ class RecruiterNotesExtractor(ExtractorInterface):
     def supported_source_types(self) -> list[SourceType]:
         return [SourceType.RECRUITER_NOTES]
 
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         text = parsed.raw_text or ""
         values: list[ExtractedValue] = []
         st = SourceType.RECRUITER_NOTES
@@ -96,4 +96,4 @@ class RecruiterNotesExtractor(ExtractorInterface):
             values.append(ExtractedValue(field_name=FieldName.SUMMARY, raw_value=text[:500],
                 source_type=st, extraction_method="full_text", extraction_confidence=0.40))
 
-        return ExtractedRecord(source_type=st, values=values)
+        return ExtractedCandidate(source_type=st, values=values)

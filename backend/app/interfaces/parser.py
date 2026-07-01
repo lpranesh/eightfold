@@ -1,7 +1,7 @@
 """Parser interface definition."""
 
 from abc import ABC, abstractmethod
-from app.models.intermediate import ParsedContent, SourceType
+from app.models.intermediate import ParsedDocument, SourceType
 
 
 class ParserInterface(ABC):
@@ -12,5 +12,5 @@ class ParserInterface(ABC):
         """Check if parser supports the given source."""
 
     @abstractmethod
-    def parse(self, content: bytes, source_type: SourceType, filename: str) -> ParsedContent:
+    def parse(self, content: bytes, source_type: SourceType, filename: str) -> ParsedDocument:
         """Parse raw content into structured intermediate format."""

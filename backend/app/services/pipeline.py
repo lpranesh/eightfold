@@ -23,7 +23,7 @@ from app.models.domain.candidate import (
     CandidateMetadata, CandidateRecord, CanonicalProfile, FieldProvenance,
 )
 from app.models.domain.enums import ConfidenceLevel, FieldName, SourceType, TransformationStatus
-from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
+from app.models.domain.source import ExtractedCandidate, ExtractedValue, ParsedDocument
 from app.normalizers import get_all_normalizers
 from app.provenance import DefaultProvenanceBuilder
 
@@ -146,9 +146,9 @@ class TransformationPipeline:
             provenance=provenance,
         )
 
-    def _stage_parse(self, sources: list[SourceInput], result: PipelineResult) -> list[ParsedContent]:
+    def _stage_parse(self, sources: list[SourceInput], result: PipelineResult) -> list[ParsedDocument]:
         start = time.monotonic()
-        parsed: list[ParsedContent] = []
+        parsed: list[ParsedDocument] = []
         warnings: list[str] = []
 
         for source in sources:
@@ -166,9 +166,9 @@ class TransformationPipeline:
                          items=len(parsed), warnings=warnings)
         return parsed
 
-    def _stage_extract(self, parsed: list[ParsedContent], result: PipelineResult) -> list[ExtractedRecord]:
+    def _stage_extract(self, parsed: list[ParsedDocument], result: PipelineResult) -> list[ExtractedCandidate]:
         start = time.monotonic()
-        records: list[ExtractedRecord] = []
+        records: list[ExtractedCandidate] = []
         warnings: list[str] = []
 
         for content in parsed:
@@ -189,9 +189,9 @@ class TransformationPipeline:
                          items=sum(len(r.values) for r in records), warnings=warnings)
         return records
 
-    def _stage_normalize(self, records: list[ExtractedRecord], result: PipelineResult) -> list[ExtractedRecord]:
+    def _stage_normalize(self, records: list[ExtractedCandidate], result: PipelineResult) -> list[ExtractedCandidate]:
         start = time.monotonic()
-        normalized: list[ExtractedRecord] = []
+        normalized: list[ExtractedCandidate] = []
         norm_count = 0
 
         for record in records:
@@ -205,7 +205,7 @@ class TransformationPipeline:
                     except Exception as exc:
                         logger.warning("Normalization failed for %s: %s", value.field_name.value, exc)
                 new_values.append(value)
-            normalized.append(ExtractedRecord(
+            normalized.append(ExtractedCandidate(
                 source_type=record.source_type,
                 values=new_values,
                 extraction_warnings=record.extraction_warnings,
@@ -215,7 +215,7 @@ class TransformationPipeline:
         result.add_stage("normalize", "completed", (time.monotonic() - start) * 1000, items=norm_count)
         return normalized
 
-    def _stage_fuse(self, records: list[ExtractedRecord], result: PipelineResult
+    def _stage_fuse(self, records: list[ExtractedCandidate], result: PipelineResult
                     ) -> tuple[CanonicalProfile, dict[str, FieldProvenance], int]:
         start = time.monotonic()
 

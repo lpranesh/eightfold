@@ -1,7 +1,7 @@
 """Extractor interface definition."""
 
 from abc import ABC, abstractmethod
-from app.models.intermediate import ExtractedRecord, ParsedContent, SourceType
+from app.models.intermediate import ExtractedCandidate, ParsedDocument, SourceType
 
 
 class ExtractorInterface(ABC):
@@ -12,5 +12,5 @@ class ExtractorInterface(ABC):
         """Return the source types this extractor supports."""
 
     @abstractmethod
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         """Extract structured fields from parsed content."""

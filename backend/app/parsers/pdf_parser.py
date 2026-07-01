@@ -10,7 +10,7 @@ from typing import Optional
 from app.exceptions import ParsingException
 from app.interfaces import ParserInterface
 from app.models.domain.enums import SourceType
-from app.models.domain.source import ParsedContent
+from app.models.domain.source import ParsedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class PDFParser(ParserInterface):
         """Check if this parser handles the given source."""
         return file_extension.lower() == ".pdf"
 
-    def parse(self, content: bytes, source_type: SourceType) -> ParsedContent:
+    def parse(self, content: bytes, source_type: SourceType) -> ParsedDocument:
         """Parse a PDF file into text content.
 
         Args:
@@ -39,7 +39,7 @@ class PDFParser(ParserInterface):
             source_type: The source type (typically RESUME).
 
         Returns:
-            ParsedContent with extracted text.
+            ParsedDocument with extracted text.
 
         Raises:
             ParsingException: If PDF parsing fails completely.
@@ -54,7 +54,7 @@ class PDFParser(ParserInterface):
                 "PDF parsed successfully with pdfplumber",
                 extra={"text_length": len(text), "pages": page_count},
             )
-            return ParsedContent(
+            return ParsedDocument(
                 source_type=source_type,
                 raw_text=text,
                 page_count=page_count,
@@ -67,7 +67,7 @@ class PDFParser(ParserInterface):
             logger.info("pdfplumber extracted insufficient text, falling back to OCR")
             ocr_text = self._extract_with_ocr(content, warnings)
             if ocr_text:
-                return ParsedContent(
+                return ParsedDocument(
                     source_type=source_type,
                     raw_text=ocr_text,
                     page_count=page_count,
@@ -79,7 +79,7 @@ class PDFParser(ParserInterface):
             warnings.append(
                 "Extracted text is very short; document may be partially scanned"
             )
-            return ParsedContent(
+            return ParsedDocument(
                 source_type=source_type,
                 raw_text=text,
                 page_count=page_count,

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from app.models.domain.enums import FieldName, SourceType
 
 
-class ParsedContent(BaseModel):
+class ParsedDocument(BaseModel):
     """Raw content extracted by a parser from a source document.
 
     This is the output of the Parser stage and input to the Extractor stage.
@@ -41,7 +41,7 @@ class ExtractedValue(BaseModel):
     source_location: Optional[str] = None  # e.g., "page 1, line 5"
 
 
-class ExtractedRecord(BaseModel):
+class ExtractedCandidate(BaseModel):
     """All values extracted from a single source document.
 
     Groups extracted values by source, preserving the relationship

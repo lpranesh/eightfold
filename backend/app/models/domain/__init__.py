@@ -14,7 +14,7 @@ from app.models.domain.enums import (
     SourceType,
     TransformationStatus,
 )
-from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
+from app.models.domain.source import ExtractedCandidate, ExtractedValue, ParsedDocument
 
 __all__ = [
     "CandidateMetadata",
@@ -23,11 +23,11 @@ __all__ = [
     "ConfidenceLevel",
     "EducationEntry",
     "ExperienceEntry",
-    "ExtractedRecord",
+    "ExtractedCandidate",
     "ExtractedValue",
     "FieldName",
     "FieldProvenance",
-    "ParsedContent",
+    "ParsedDocument",
     "SourceType",
     "TransformationStatus",
 ]

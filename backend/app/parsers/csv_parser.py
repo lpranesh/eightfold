@@ -11,7 +11,7 @@ from typing import Any
 from app.exceptions import ParsingException
 from app.interfaces import ParserInterface
 from app.models.domain.enums import SourceType
-from app.models.domain.source import ParsedContent
+from app.models.domain.source import ParsedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class CSVParser(ParserInterface):
         """Check if this parser handles the given source."""
         return file_extension.lower() == ".csv"
 
-    def parse(self, content: bytes, source_type: SourceType) -> ParsedContent:
+    def parse(self, content: bytes, source_type: SourceType) -> ParsedDocument:
         """Parse a CSV file into structured data.
 
         Args:
@@ -36,7 +36,7 @@ class CSVParser(ParserInterface):
             source_type: The source type (typically RECRUITER_CSV).
 
         Returns:
-            ParsedContent with structured_data containing the rows.
+            ParsedDocument with structured_data containing the rows.
 
         Raises:
             ParsingException: If CSV parsing fails.
@@ -84,7 +84,7 @@ class CSVParser(ParserInterface):
                 extra={"rows": len(rows), "columns": len(rows[0]) if rows else 0},
             )
 
-            return ParsedContent(
+            return ParsedDocument(
                 source_type=source_type,
                 structured_data={"rows": rows, "row_count": len(rows)},
                 raw_text=text,

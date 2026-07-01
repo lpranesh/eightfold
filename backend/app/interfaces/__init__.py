@@ -14,14 +14,14 @@ from app.models.domain.candidate import (
     FieldProvenance,
 )
 from app.models.domain.enums import FieldName, SourceType
-from app.models.domain.source import ExtractedRecord, ExtractedValue, ParsedContent
+from app.models.domain.source import ExtractedCandidate, ExtractedValue, ParsedDocument
 
 
 class ParserInterface(ABC):
     """Contract for source document parsers.
 
     Each parser handles a specific file format (PDF, CSV, JSON, TXT)
-    and produces a ParsedContent object.
+    and produces a ParsedDocument object.
     """
 
     @abstractmethod
@@ -37,8 +37,8 @@ class ParserInterface(ABC):
         """
 
     @abstractmethod
-    def parse(self, content: bytes, source_type: SourceType) -> ParsedContent:
-        """Parse raw file bytes into structured ParsedContent.
+    def parse(self, content: bytes, source_type: SourceType) -> ParsedDocument:
+        """Parse raw file bytes into structured ParsedDocument.
 
         Args:
             content: Raw file bytes.
@@ -64,7 +64,7 @@ class ExtractorInterface(ABC):
         """Return the source types this extractor supports."""
 
     @abstractmethod
-    def extract(self, parsed: ParsedContent) -> ExtractedRecord:
+    def extract(self, parsed: ParsedDocument) -> ExtractedCandidate:
         """Extract structured values from parsed content.
 
         Args:

@@ -1,24 +1,38 @@
-"""GitHub JSON Parser."""
+"""GitHub Parser."""
 
 import json
 from app.interfaces.parser import ParserInterface
-from app.models.intermediate import ParsedContent, SourceType
-from app.core.exceptions import ParsingException
-
+from app.models.intermediate import ParsedDocument, SourceType
 
 class GitHubParser(ParserInterface):
-    """Parses JSON data returned by the GitHub connector."""
-
     def can_parse(self, source_type: SourceType, file_extension: str) -> bool:
         return source_type == SourceType.GITHUB_PROFILE
 
-    def parse(self, content: bytes, source_type: SourceType, filename: str) -> ParsedContent:
+    def parse(self, content: bytes | str, source_type: SourceType, filename: str) -> ParsedDocument:
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        
         try:
-            data = json.loads(content.decode("utf-8"))
-            return ParsedContent(
-                source_type=source_type,
-                filename=filename,
-                structured_data=data,
-            )
-        except Exception as e:
-            raise ParsingException(f"Failed to parse GitHub JSON: {e}")
+            data = json.loads(content)
+        except json.JSONDecodeError:
+            data = {}
+            
+        profile = data.get("profile", {})
+        repos = data.get("repos", [])
+        
+        structured = {
+            "name": profile.get("name"),
+            "login": profile.get("login"),
+            "email": profile.get("email"),
+            "bio": profile.get("bio"),
+            "location": profile.get("location"),
+            "company": profile.get("company"),
+            "html_url": profile.get("html_url"),
+            "languages": list(set([r.get("language") for r in repos if r.get("language")]))
+        }
+        
+        return ParsedDocument(
+            source_type=source_type,
+            filename=filename,
+            structured_data=structured
+        )
