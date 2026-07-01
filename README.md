@@ -104,4 +104,10 @@ Initially I implemented only Regex extraction.
 During testing, I found that Regex works extremely well for deterministic entities like emails, phone numbers and URLs.
 
 Eg :
-f
+![Alt text](before_ner.jpeg)
+
+## After hybrid of NER + Regex
+
+![Alt text](hybrid-1.jpeg)
+![Alt text](hybrid-2.jpeg)
+
