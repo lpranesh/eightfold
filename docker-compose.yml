@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENABLE_NER=false
+      - ENABLE_NER=true
       - OCR_ENGINE=tesseract
     volumes:
       - ./backend:/app
